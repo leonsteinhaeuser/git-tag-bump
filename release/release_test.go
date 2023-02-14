@@ -186,8 +186,7 @@ func Test_bumpPreRelease(t *testing.T) {
 
 func Test_getLatestSemVerTagFromRepoPath(t *testing.T) {
 	type args struct {
-		repo           *git.Repository
-		semverBumpType SemVerBumpType
+		repo *git.Repository
 	}
 	tests := []struct {
 		name    string
@@ -208,7 +207,6 @@ func Test_getLatestSemVerTagFromRepoPath(t *testing.T) {
 					}
 					return repo
 				}(),
-				semverBumpType: SemVerBumpTypeMajor,
 			},
 			want:    semver.MustParse("2.0.1"),
 			wantErr: false,
@@ -216,7 +214,7 @@ func Test_getLatestSemVerTagFromRepoPath(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GetLatestSemVerTagFromRepoPath(tt.args.repo, tt.args.semverBumpType)
+			got, err := GetLatestSemVerTagFromRepoPath(tt.args.repo)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("getLatestSemVerTagFromRepoPath() error = %v, wantErr %v", err, tt.wantErr)
 				return
