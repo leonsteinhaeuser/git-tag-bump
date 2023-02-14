@@ -26,7 +26,7 @@ func main() {
 		panic(err)
 	}
 
-	latest, err := release.GetLatestSemVerTagFromRepoPath(repo, release.SemVerBumpType(*bumpType))
+	latest, err := release.GetLatestSemVerTagFromRepoPath(repo)
 	if err != nil {
 		panic(err)
 	}
