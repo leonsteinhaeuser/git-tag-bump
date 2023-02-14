@@ -19,5 +19,6 @@ jobs:
       - uses: actions/setup-go@v3
         with:
           go-version: ${{ env.go_version}}
+      - run: go mod tidy
       - name: Run unit tests
         run: go test -coverprofile=$COVER_FILE -covermode=atomic ./...
