@@ -113,6 +113,10 @@ func GetLatestSemVerTagFromRepoPath(repo *git.Repository, semverBumpType SemVerB
 		}
 	}
 
+	if latest == nil {
+		return semver.MustParse("v0.0.0"), nil
+	}
+
 	return latest, nil
 }
 
