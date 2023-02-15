@@ -72,7 +72,9 @@ func bumpPreRelease(smvFormat PreReleaseFormat, version semver.Version, preRelea
 	return fmt.Sprintf("%s-%s.%d", tagPrefix, preReleasePrefix, 1)
 }
 
-func GetLatestSemVerTagFromRepoPath(repo *git.Repository) (*semver.Version, error) {
+// GetLatestSemVerTagFromRepo returns the latest semver tag from a given git repository.
+// If no semver tag is found, it returns a semver.Version with the value v0.0.0.
+func GetLatestSemVerTagFromRepo(repo *git.Repository) (*semver.Version, error) {
 	// get tags from repository
 	tags, err := repo.Tags()
 	if err != nil {
@@ -120,9 +122,9 @@ func GetLatestSemVerTagFromRepoPath(repo *git.Repository) (*semver.Version, erro
 	return latest, nil
 }
 
-// BumpVersion takes a semver.Version and a semVerBumpType and returns the
+// BumpTag takes a semver.Version and a semVerBumpType and returns the
 // bumped version as a string.
-func BumpVersion(latest *semver.Version, semVerType SemVerBumpType, preReleaseFormat PreReleaseFormat, preReleasePrefix string, isPreRelease bool) string {
+func BumpTag(latest *semver.Version, semVerType SemVerBumpType, preReleaseFormat PreReleaseFormat, preReleasePrefix string, isPreRelease bool) string {
 	newTag := semver.Version{}
 	switch semVerType {
 	case SemVerBumpTypeMajor:

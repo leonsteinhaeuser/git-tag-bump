@@ -26,12 +26,12 @@ func main() {
 		panic(err)
 	}
 
-	latest, err := release.GetLatestSemVerTagFromRepoPath(repo)
+	latest, err := release.GetLatestSemVerTagFromRepo(repo)
 	if err != nil {
 		panic(err)
 	}
 
-	newTag := release.BumpVersion(
+	newTag := release.BumpTag(
 		latest,
 		release.SemVerBumpType(*bumpType),
 		release.PreReleaseFormat(*preReleaseFormat),
