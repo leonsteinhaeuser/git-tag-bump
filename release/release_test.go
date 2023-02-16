@@ -214,7 +214,7 @@ func Test_getLatestSemVerTagFromRepoPath(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GetLatestSemVerTagFromRepoPath(tt.args.repo)
+			got, err := GetLatestSemVerTagFromRepo(tt.args.repo)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("getLatestSemVerTagFromRepoPath() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -309,7 +309,7 @@ func Test_bumpVersion(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := BumpVersion(tt.args.latest, tt.args.semVerType, tt.args.preReleaseFormat, tt.args.preReleasePrefix, tt.args.isPreRelease); got != tt.want {
+			if got := BumpTag(tt.args.latest, tt.args.semVerType, tt.args.preReleaseFormat, tt.args.preReleasePrefix, tt.args.isPreRelease); got != tt.want {
 				t.Errorf("bumpVersion() = %v, want %v", got, tt.want)
 			}
 		})

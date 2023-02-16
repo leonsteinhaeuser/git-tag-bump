@@ -49,7 +49,7 @@ func main() {
 		panic(err)
 	}
 
-	latest, err := release.GetLatestSemVerTagFromRepoPath(repo)
+	latest, err := release.GetLatestSemVerTagFromRepo(repo)
 	if err != nil {
 		panic(err)
 	}
@@ -63,7 +63,7 @@ func main() {
 		bt = identifier
 	}
 
-	newTag := release.BumpVersion(
+	newTag := release.BumpTag(
 		latest,
 		bt,
 		release.PreReleaseFormat(*preReleaseFormat),
