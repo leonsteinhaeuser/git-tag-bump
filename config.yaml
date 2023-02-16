@@ -1,0 +1,14 @@
+major:
+  branch:
+    name:
+      regex: '^(feat|feature|enh|enhanc|enhancement|fix|bugfix|chore\([a-z0-9-]+\))!/'
+
+minor:
+  branch:
+    name:
+      regex: "^(feat|feature)/"
+
+patch:
+  branch:
+    name:
+      regex: '^(enh|enhanc|enhancement|fix|bugfix|chore\([a-z0-9-]+\))/'
