@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/go-git/go-git/v5"
+	gconfig "github.com/go-git/go-git/v5/config"
 	"github.com/leonsteinhaeuser/git-tag-identifier/branch"
 	"github.com/leonsteinhaeuser/git-tag-identifier/release"
 	"gopkg.in/yaml.v3"
@@ -19,6 +20,7 @@ var (
 	repoTarget       = flag.String("repo-path", ".", "Path to the repository")
 	configPath       = flag.String("config", "", "Path to the config file")
 	autoBump         = flag.Bool("auto-bump", false, "Whether to automatically bump the version based on the rules in the config file")
+	createTag        = flag.Bool("create", false, "Whether to create a tag in the repository and push it to the remote")
 
 	//go:embed config.yaml
 	configBts []byte
@@ -70,6 +72,33 @@ func main() {
 		*preReleasePrefix,
 		*isPreRelease,
 	)
+
+	if *createTag {
+		rfc, err := repo.Head()
+		if err != nil {
+			panic(err)
+		}
+		// create the tag in the repository for the current commit hash
+		pmbrfc, err := repo.CreateTag(newTag, rfc.Hash(), &git.CreateTagOptions{
+			//Tagger:  nil,
+			Message: newTag,
+		})
+		if err != nil {
+			panic(err)
+		}
+
+		// push the tag to the remote
+		refTag := pmbrfc.Name().String()
+		err = repo.Push(&git.PushOptions{
+			FollowTags: true,
+			RefSpecs: []gconfig.RefSpec{
+				gconfig.RefSpec(fmt.Sprintf("%s:%s", refTag, refTag)),
+			},
+		})
+		if err != nil {
+			panic(err)
+		}
+	}
 
 	fmt.Println(newTag)
 }
