@@ -24,21 +24,21 @@ func TestReadConfig(t *testing.T) {
 				Major: Identifier{
 					Branch: BranchIdentifier{
 						Name: RegExIdentifier{
-							RegEx: `^(feat|feature|enh|enhanc|enhancement|fix|bugfix|chore\([a-z0-9-]+\))!/`,
+							RegEx: `^(feat|feature|enh|enhanc|enhancement|fix|bugfix|chore)(\([a-z0-9-]+\)){0,1}!\/`,
 						},
 					},
 				},
 				Minor: Identifier{
 					Branch: BranchIdentifier{
 						Name: RegExIdentifier{
-							RegEx: "^(feat|feature)/",
+							RegEx: `^(feat|feature)(\([a-z0-9-]+\)){0,1}\/`,
 						},
 					},
 				},
 				Patch: Identifier{
 					Branch: BranchIdentifier{
 						Name: RegExIdentifier{
-							RegEx: `^(enh|enhanc|enhancement|fix|bugfix|chore\([a-z0-9-]+\))/`,
+							RegEx: `(enh|enhanc|enhancement|fix|bugfix|chore)(\([a-z0-9-]+\)){0,1}\/`,
 						},
 					},
 				},
