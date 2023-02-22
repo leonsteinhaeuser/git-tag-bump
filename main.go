@@ -19,6 +19,7 @@ var (
 	repoTarget       = flag.String("repo-path", ".", "Path to the repository")
 	configPath       = flag.String("config", "", "Path to the config file")
 	autoBump         = flag.Bool("auto-bump", false, "Whether to automatically bump the version based on the rules in the config file")
+	branchName       = flag.String("branch-name", "", "Name of the branch to check")
 
 	//go:embed config.yaml
 	configBts []byte
@@ -55,12 +56,19 @@ func main() {
 	}
 
 	bt := release.SemVerBumpType(*bumpType)
-	if *autoBump {
+	if *autoBump && *branchName == "" {
 		identifier, err := branch.Identify(config, repo)
 		if err != nil {
 			panic(err)
 		}
 		bt = identifier
+	}
+	if *branchName != "" {
+		smvTag, err := branch.IdentifyBranch(config, *branchName)
+		if err != nil {
+			panic(err)
+		}
+		bt = smvTag
 	}
 
 	newTag := release.BumpTag(
