@@ -1,14 +1,14 @@
 major:
   branch:
     name:
-      regex: '^(feat|feature|enh|enhanc|enhancement|fix|bugfix|chore\([a-z0-9-]+\))!/'
+      regex: '^(feat|feature|enh|enhanc|enhancement|fix|bugfix|chore)(\([a-z0-9-]+\)){0,1}!\/'
 
 minor:
   branch:
     name:
-      regex: "^(feat|feature)/"
+      regex: '^(feat|feature)(\([a-z0-9-]+\)){0,1}\/'
 
 patch:
   branch:
     name:
-      regex: '^(enh|enhanc|enhancement|fix|bugfix|chore\([a-z0-9-]+\))/'
+      regex: '(enh|enhanc|enhancement|fix|bugfix|chore)(\([a-z0-9-]+\)){0,1}\/'
