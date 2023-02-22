@@ -42,7 +42,6 @@ func Identify(cfg *Config, repo *git.Repository) (release.SemVerBumpType, error)
 	if err != nil {
 		return "", err
 	}
-	fmt.Println("branch name:", bn)
 	bumpType, err := identifyBranch(cfg, bn)
 	if err == nil {
 		// we found a match for the branch name
