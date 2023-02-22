@@ -25,13 +25,13 @@ func branchName(repo *git.Repository) (string, error) {
 func identifyBranch(cfg *Config, branch string) (release.SemVerBumpType, error) {
 	// check if branch name matches any of the configured identifiers
 	if cfg.Major.match(branch) {
-		return "major", nil
+		return release.SemVerBumpTypeMajor, nil
 	}
 	if cfg.Minor.match(branch) {
-		return "minor", nil
+		return release.SemVerBumpTypeMinor, nil
 	}
 	if cfg.Patch.match(branch) {
-		return "patch", nil
+		return release.SemVerBumpTypePatch, nil
 	}
 	return "", fmt.Errorf("%w: for branch %q", ErrBranchNameFormat, branch)
 }
