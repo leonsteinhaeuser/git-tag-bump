@@ -1,7 +1,6 @@
 package branch
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/go-git/go-git/v5"
@@ -43,6 +42,7 @@ func Identify(cfg *Config, repo *git.Repository) (release.SemVerBumpType, error)
 	if err != nil {
 		return "", err
 	}
+	fmt.Println("branch name:", bn)
 	bumpType, err := identifyBranch(cfg, bn)
 	if err == nil {
 		// we found a match for the branch name
@@ -50,5 +50,5 @@ func Identify(cfg *Config, repo *git.Repository) (release.SemVerBumpType, error)
 	}
 	// we did not find a match for the branch name
 	// TODO: check if pull request was merged and has the correct labels
-	return "", errors.New("not implemented")
+	return "", fmt.Errorf("not implemented for branch %s", bn)
 }
