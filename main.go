@@ -71,5 +71,5 @@ func main() {
 		*isPreRelease,
 	)
 
-	fmt.Println("Latest version:", newTag)
+	fmt.Println(newTag)
 }
