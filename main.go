@@ -19,6 +19,7 @@ var (
 	repoTarget       = flag.String("repo-path", ".", "Path to the repository")
 	configPath       = flag.String("config", "", "Path to the config file")
 	autoBump         = flag.Bool("auto-bump", false, "Whether to automatically bump the version based on the rules in the config file")
+	vPrefix          = flag.Bool("v-prefix", true, "Whether to prefix the tag with a 'v'. E.g. v1.0.0 instead of 1.0.0")
 
 	//go:embed config.yaml
 	configBts []byte
@@ -70,6 +71,11 @@ func main() {
 		*preReleasePrefix,
 		*isPreRelease,
 	)
+
+	// add v prefix if enabled
+	if *vPrefix {
+		newTag = fmt.Sprintf("v%s", newTag)
+	}
 
 	fmt.Println(newTag)
 }
