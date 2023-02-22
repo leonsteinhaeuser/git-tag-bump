@@ -20,9 +20,9 @@ func branchName(repo *git.Repository) (string, error) {
 	return branch.Name().Short(), nil
 }
 
-// identifyBranch identifies the bump type of a branch
+// IdentifyBranch identifies the bump type of a branch
 // if the branch does not match any of the configured identifiers, an error is returned
-func identifyBranch(cfg *Config, branch string) (release.SemVerBumpType, error) {
+func IdentifyBranch(cfg *Config, branch string) (release.SemVerBumpType, error) {
 	// check if branch name matches any of the configured identifiers
 	if cfg.Major.match(branch) {
 		return release.SemVerBumpTypeMajor, nil
@@ -42,7 +42,7 @@ func Identify(cfg *Config, repo *git.Repository) (release.SemVerBumpType, error)
 	if err != nil {
 		return "", err
 	}
-	bumpType, err := identifyBranch(cfg, bn)
+	bumpType, err := IdentifyBranch(cfg, bn)
 	if err == nil {
 		// we found a match for the branch name
 		return bumpType, nil
