@@ -21,6 +21,8 @@ var (
 	configPath       = flag.String("config", "", "Path to the config file")
 	autoBump         = flag.Bool("auto-bump", false, "Whether to automatically bump the version based on the rules in the config file")
 	createTag        = flag.Bool("create", false, "Whether to create a tag in the repository and push it to the remote")
+	branchName       = flag.String("branch-name", "", "Name of the branch to check")
+	vPrefix          = flag.Bool("v-prefix", true, "Whether to prefix the tag with a 'v'. E.g. v1.0.0 instead of 1.0.0")
 
 	//go:embed config.yaml
 	configBts []byte
@@ -57,12 +59,19 @@ func main() {
 	}
 
 	bt := release.SemVerBumpType(*bumpType)
-	if *autoBump {
+	if *autoBump && *branchName == "" {
 		identifier, err := branch.Identify(config, repo)
 		if err != nil {
 			panic(err)
 		}
 		bt = identifier
+	}
+	if *branchName != "" {
+		smvTag, err := branch.IdentifyBranch(config, *branchName)
+		if err != nil {
+			panic(err)
+		}
+		bt = smvTag
 	}
 
 	newTag := release.BumpTag(
@@ -72,6 +81,11 @@ func main() {
 		*preReleasePrefix,
 		*isPreRelease,
 	)
+
+	// add v prefix if enabled
+	if *vPrefix {
+		newTag = fmt.Sprintf("v%s", newTag)
+	}
 
 	if *createTag {
 		rfc, err := repo.Head()
@@ -98,7 +112,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-	}
+  }
 
 	fmt.Println(newTag)
 }
