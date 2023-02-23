@@ -21,21 +21,41 @@ archives:
       {{- else if eq .Arch "386" }}i386
       {{- else }}{{ .Arch }}{{ end }}
       {{- if .Arm }}v{{ .Arm }}{{ end }}
+
+release:
+  draft: true
+  prerelease: auto
+  name_template: "Release {{ .Tag }}"
+  mode: prepend
+  header: |
+    ## Release {{ .Tag }} on {{ .Date }}
+
 checksum:
   name_template: 'checksums.txt'
 snapshot:
   name_template: "{{ incpatch .Version }}-next"
+
 changelog:
+  use: github
   sort: asc
+  groups:
+    - title: Features
+      regexp: "^.*feat[(\\w)]*:+.*$"
+      order: 0
+    - title: "Bug fixes"
+      regexp: "^.*fix[(\\w)]*:+.*$"
+      order: 1
+    - title: "Enhancements"
+      regexp: "^.*enhancement[(\\w)]*:+.*$"
+      order: 2
+    - title: Others
+      order: 999
   filters:
     exclude:
-      - '^docs:'
-      - '^test:'
-      - '^chore(deps):'
-      - '^build:'
-      - '^ci:'
-      - '^cd:'
-      - '^ci/cd:'
+      - "^docs:"
+      - "^test:"
+      - "^Merge branch"
+      - "^chore(deps):"
 
 # The lines beneath this are called `modelines`. See `:help modeline`
 # Feel free to remove those if you don't want/use them.
