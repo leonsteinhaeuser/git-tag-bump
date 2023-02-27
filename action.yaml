@@ -1,0 +1,35 @@
+name: "git-tag-bump"
+description: 'Bump the version of a git tag based on conditions and inputs'
+branding:
+  icon: 'aperture'
+  color: 'blue'
+inputs:
+  args:
+    description: 'Arguments to pass to the bump script. By default this is empty and the bump script will use the default settings for bumping the version (bump patch version).'
+    required: false
+    default: ''
+  version:
+    description: 'The version of the tool to use'
+    required: false
+    default: 'latest'
+outputs:
+  tag-number:
+    description: "The new tag number"
+    value: ${{ steps.tagger.outputs.TAG_NUMBER }}
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-go@v3
+      with:
+        go-version: '>=1.20'
+    - name: "Install git-tag-bump"
+      shell: bash
+      run: go install github.com/leonsteinhaeuser/git-tag-bump@${{ inputs.version }}
+    - name: "Generate new tag number"
+      id: tagger
+      shell: bash
+      run: |
+        echo "TAG_NUMBER=$(git-tag-bump ${{ inputs.args }})" >> $GITHUB_OUTPUTS
+    - name: "Output tag number"
+      shell: bash
+      run: echo "Created git tag with version ${{ steps.tagger.outputs.TAG_NUMBER }}"
