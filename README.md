@@ -82,3 +82,154 @@ What this means is that the following branch names will result in the following 
 | `bugfix(ctx)`           | `patch` | `v1.0.1` |
 | `chore`                 | `patch` | `v1.0.1` |
 | `chore(ctx)`            | `patch` | `v1.0.1` |
+
+## Using the tool in a CI/CD pipeline
+
+The tool can be used in a CI/CD pipeline to automatically determine the next version and create a tag for it. The following example shows how to use the tool in a GitHub CI/CD pipeline:
+
+Manually create a tag based on the branch name:
+
+```yaml
+name: Release
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  tag-branch:
+    if: github.event.pull_request.merged == true && (github.base_ref == 'main' || github.base_ref == 'staging')
+    runs-on: ubuntu-latest
+    env:
+      FROM_BRANCH: ${{ github.head_ref }}
+      SHORT_BRANCH_NAME: ${{ github.base_ref }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          branch: ${{ env.SHORT_BRANCH_NAME }}
+
+      - name: Extract branch name prefix
+        run: |
+          echo "BRANCH_NAME_PREFIX=$(echo ${{ env.FROM_BRANCH }} | cut -d'/' -f1)" >> $GITHUB_ENV
+
+      - name: Is feature branch and does not contain a breaking change and is staging
+        if: |
+          (contains(env.BRANCH_NAME_PREFIX, 'feat') ||
+          contains(env.BRANCH_NAME_PREFIX, 'feature') ||
+          contains(env.BRANCH_NAME_PREFIX, 'chore') ||
+          contains(env.BRANCH_NAME_PREFIX, 'refactor') ||
+          contains(env.BRANCH_NAME_PREFIX, 'revert')) &&
+          !endsWith(env.BRANCH_NAME_PREFIX, '!') && github.base_ref == 'staging'
+        uses: leonsteinhaeuser/git-tag-bump@latest
+        with:
+          args: "--bump patch --v-prefix --pre-release --create"
+          version: "latest"
+      - name: Is feature branch and does not contain a breaking change and is not staging
+        if: |
+          (contains(env.BRANCH_NAME_PREFIX, 'feat') ||
+          contains(env.BRANCH_NAME_PREFIX, 'feature') ||
+          contains(env.BRANCH_NAME_PREFIX, 'chore') ||
+          contains(env.BRANCH_NAME_PREFIX, 'refactor') ||
+          contains(env.BRANCH_NAME_PREFIX, 'revert')) &&
+          !endsWith(env.BRANCH_NAME_PREFIX, '!') && github.base_ref == 'main'
+        uses: leonsteinhaeuser/git-tag-bump@latest
+        with:
+          args: "--bump patch --v-prefix --create"
+          version: "latest"
+
+      - name: Is patch branch and is staging
+        if: |
+          (contains(env.BRANCH_NAME_PREFIX, 'fix') ||
+          contains(env.BRANCH_NAME_PREFIX, 'bugfix') ||
+          contains(env.BRANCH_NAME_PREFIX, 'hotfix')) &&
+          !endsWith(env.BRANCH_NAME_PREFIX, '!') && github.base_ref == 'staging'
+        uses: leonsteinhaeuser/git-tag-bump@latest
+        with:
+          args: "--bump minor --v-prefix --pre-release --create"
+          version: "latest"
+      - name: Is patch branch and is not staging
+        if: |
+          (contains(env.BRANCH_NAME_PREFIX, 'fix') ||
+          contains(env.BRANCH_NAME_PREFIX, 'bugfix') ||
+          contains(env.BRANCH_NAME_PREFIX, 'hotfix')) &&
+          !endsWith(env.BRANCH_NAME_PREFIX, '!') && github.base_ref == 'main'
+        uses: leonsteinhaeuser/git-tag-bump@latest
+        with:
+          args: "--bump minor --v-prefix --create"
+          version: "latest"
+
+      - name: Is a breaking change and is staging
+        if: |
+          (contains(env.BRANCH_NAME_PREFIX, 'feat') ||
+          contains(env.BRANCH_NAME_PREFIX, 'feature') ||
+          contains(env.BRANCH_NAME_PREFIX, 'chore') ||
+          contains(env.BRANCH_NAME_PREFIX, 'refactor') ||
+          contains(env.BRANCH_NAME_PREFIX, 'revert') ||
+          contains(env.BRANCH_NAME_PREFIX, 'fix') ||
+          contains(env.BRANCH_NAME_PREFIX, 'bugfix') ||
+          contains(env.BRANCH_NAME_PREFIX, 'hotfix')) &&
+          endsWith(env.BRANCH_NAME_PREFIX, '!') && github.base_ref == 'staging'
+        uses: leonsteinhaeuser/git-tag-bump@latest
+        with:
+          args: "--bump major --v-prefix --pre-release --create"
+          version: "latest"
+      - name: Is a breaking change and is not staging
+        if: |
+          (contains(env.BRANCH_NAME_PREFIX, 'feat') ||
+          contains(env.BRANCH_NAME_PREFIX, 'feature') ||
+          contains(env.BRANCH_NAME_PREFIX, 'chore') ||
+          contains(env.BRANCH_NAME_PREFIX, 'refactor') ||
+          contains(env.BRANCH_NAME_PREFIX, 'revert') ||
+          contains(env.BRANCH_NAME_PREFIX, 'fix') ||
+          contains(env.BRANCH_NAME_PREFIX, 'bugfix') ||
+          contains(env.BRANCH_NAME_PREFIX, 'hotfix')) &&
+          endsWith(env.BRANCH_NAME_PREFIX, '!') && github.base_ref == 'main'
+        uses: leonsteinhaeuser/git-tag-bump@latest
+        with:
+          args: "--bump major --v-prefix --create"
+          version: "latest"
+```
+
+Automatically determine the next version and create a tag for it:
+
+```yaml
+name: Release
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  tag-branch:
+    if: github.event.pull_request.merged == true && (github.base_ref == 'main' || github.base_ref == 'staging')
+    runs-on: ubuntu-latest
+    env:
+      FROM_BRANCH: ${{ github.head_ref }}
+      SHORT_BRANCH_NAME: ${{ github.base_ref }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          branch: ${{ env.SHORT_BRANCH_NAME }}
+
+      - name: Extract branch name prefix
+        run: |
+          echo "BRANCH_NAME_PREFIX=$(echo ${{ env.FROM_BRANCH }} | cut -d'/' -f1)" >> $GITHUB_ENV
+
+      - name: Pre-release
+        if: github.base_ref == 'staging'
+        uses: leonsteinhaeuser/git-tag-bump@latest
+        with:
+          args: "--v-prefix --pre-release --pre-release-format 'datetime' --auto-bump --branch-name \"${{ env.FROM_BRANCH }}\" --create"
+          version: "latest"
+
+      - name: Release
+        if: github.base_ref == 'staging'
+        uses: leonsteinhaeuser/git-tag-bump@latest
+        with:
+          args: "--v-prefix --pre-release --pre-release-format 'datetime' --auto-bump --branch-name \"${{ env.FROM_BRANCH }}\" --create"
+          version: "latest"
+```
