@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	gconfig "github.com/go-git/go-git/v5/config"
+	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/leonsteinhaeuser/git-tag-bump/branch"
 	"github.com/leonsteinhaeuser/git-tag-bump/release"
 	"gopkg.in/yaml.v3"
@@ -23,6 +24,14 @@ var (
 	createTag        = flag.Bool("create", false, "Whether to create a tag in the repository and push it to the remote")
 	branchName       = flag.String("branch-name", "", "Name of the branch to check")
 	vPrefix          = flag.Bool("v-prefix", true, "Whether to prefix the tag with a 'v'. E.g. v1.0.0 instead of 1.0.0")
+
+	actorName = flag.String("actor-name", "", "The name of the actor used to create the tag. Only used if --create is set.")
+	actorMail = flag.String("actor-mail", "", "The mail of the actor used to create the tag. Only used if --create is set.")
+
+	actor = &object.Signature{
+		Name:  *actorName,
+		Email: *actorMail,
+	}
 
 	//go:embed config.yaml
 	configBts []byte
@@ -96,6 +105,12 @@ func main() {
 		pmbrfc, err := repo.CreateTag(newTag, rfc.Hash(), &git.CreateTagOptions{
 			//Tagger:  nil,
 			Message: newTag,
+			Tagger: func() *object.Signature {
+				if actor.Name == "" || actor.Email == "" {
+					return nil
+				}
+				return actor
+			}(),
 		})
 		if err != nil {
 			panic(err)
