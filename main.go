@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"flag"
 	"fmt"
+	"time"
 
 	"github.com/go-git/go-git/v5"
 	gconfig "github.com/go-git/go-git/v5/config"
@@ -31,6 +32,7 @@ var (
 	actor = &object.Signature{
 		Name:  *actorName,
 		Email: *actorMail,
+		When:  time.Now(),
 	}
 
 	//go:embed config.yaml
