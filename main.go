@@ -7,8 +7,8 @@ import (
 
 	"github.com/go-git/go-git/v5"
 	gconfig "github.com/go-git/go-git/v5/config"
-	"github.com/leonsteinhaeuser/git-tag-identifier/branch"
-	"github.com/leonsteinhaeuser/git-tag-identifier/release"
+	"github.com/leonsteinhaeuser/git-tag-bump/branch"
+	"github.com/leonsteinhaeuser/git-tag-bump/release"
 	"gopkg.in/yaml.v3"
 )
 
