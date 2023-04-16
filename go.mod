@@ -1,4 +1,4 @@
-module github.com/leonsteinhaeuser/git-tag-identifier
+module github.com/leonsteinhaeuser/git-tag-bump
 
 go 1.19
 
