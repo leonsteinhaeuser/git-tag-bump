@@ -5,11 +5,13 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/go-git/go-git/v5"
 	gconfig "github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/leonsteinhaeuser/git-tag-bump/branch"
 	"github.com/leonsteinhaeuser/git-tag-bump/release"
 	"gopkg.in/yaml.v3"
@@ -127,6 +129,8 @@ func main() {
 			RefSpecs: []gconfig.RefSpec{
 				gconfig.RefSpec(fmt.Sprintf("%s:%s", refTag, refTag)),
 			},
+			Progress: os.Stdout,
+			Auth:     &http.TokenAuth{Token: os.Getenv("GITHUB_TOKEN")},
 		})
 		if err != nil {
 			panic(err)
