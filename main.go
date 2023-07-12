@@ -4,7 +4,6 @@ import (
 	_ "embed"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"time"
 
@@ -32,11 +31,7 @@ var (
 	actorName = flag.String("actor-name", "", "The name of the actor used to create the tag. Only used if --create is set.")
 	actorMail = flag.String("actor-mail", "", "The mail of the actor used to create the tag. Only used if --create is set.")
 
-	actor = &object.Signature{
-		Name:  *actorName,
-		Email: *actorMail,
-		When:  time.Now(),
-	}
+	actor *object.Signature = &object.Signature{}
 
 	githubToken = os.Getenv("GITHUB_TOKEN")
 
@@ -62,14 +57,14 @@ func init() {
 		}
 	}
 
-	log.Printf("Create Tag: %v, Actor: %q, Mail: %q", *createTag, *actorName, *actorMail)
-
 	if *createTag && (*actorName == "" || *actorMail == "") {
 		panic("Both --actor-name and --actor-mail must be set when --create is set")
 	}
 
-	if *createTag && githubToken == "" {
-		panic("GITHUB_TOKEN environment variable must be set when --create is set")
+	if *createTag && *actorName != "" && *actorMail != "" {
+		actor.Email = *actorMail
+		actor.Name = *actorName
+		actor.When = time.Now()
 	}
 }
 
@@ -123,7 +118,6 @@ func main() {
 			//Tagger:  nil,
 			Message: newTag,
 			Tagger: func() *object.Signature {
-				log.Printf("Actor settings name=%q email=%q\n", actor.Name, actor.Email)
 				if actor.Name == "" || actor.Email == "" {
 					return nil
 				}
@@ -142,7 +136,7 @@ func main() {
 				gconfig.RefSpec(fmt.Sprintf("%s:%s", refTag, refTag)),
 			},
 			Progress: os.Stdout,
-			Auth:     &http.TokenAuth{Token: githubToken},
+			Auth:     &http.BasicAuth{Username: "bot", Password: githubToken},
 		})
 		if err != nil {
 			panic(err)
