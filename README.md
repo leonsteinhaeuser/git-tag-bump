@@ -131,10 +131,9 @@ jobs:
           contains(env.BRANCH_NAME_PREFIX, 'refactor') ||
           contains(env.BRANCH_NAME_PREFIX, 'revert')) &&
           !endsWith(env.BRANCH_NAME_PREFIX, '!') && github.base_ref == 'staging'
-        uses: leonsteinhaeuser/git-tag-bump@latest
+        uses: leonsteinhaeuser/git-tag-bump@v1.0.2
         with:
           args: "--bump patch --v-prefix --pre-release --create"
-          version: "latest"
       - name: Is feature branch and does not contain a breaking change and is not staging
         if: |
           (contains(env.BRANCH_NAME_PREFIX, 'feat') ||
@@ -143,10 +142,9 @@ jobs:
           contains(env.BRANCH_NAME_PREFIX, 'refactor') ||
           contains(env.BRANCH_NAME_PREFIX, 'revert')) &&
           !endsWith(env.BRANCH_NAME_PREFIX, '!') && github.base_ref == 'main'
-        uses: leonsteinhaeuser/git-tag-bump@latest
+        uses: leonsteinhaeuser/git-tag-bump@v1.0.2
         with:
           args: "--bump patch --v-prefix --create"
-          version: "latest"
 
       - name: Is patch branch and is staging
         if: |
@@ -154,20 +152,18 @@ jobs:
           contains(env.BRANCH_NAME_PREFIX, 'bugfix') ||
           contains(env.BRANCH_NAME_PREFIX, 'hotfix')) &&
           !endsWith(env.BRANCH_NAME_PREFIX, '!') && github.base_ref == 'staging'
-        uses: leonsteinhaeuser/git-tag-bump@latest
+        uses: leonsteinhaeuser/git-tag-bump@v1.0.2
         with:
           args: "--bump minor --v-prefix --pre-release --create"
-          version: "latest"
       - name: Is patch branch and is not staging
         if: |
           (contains(env.BRANCH_NAME_PREFIX, 'fix') ||
           contains(env.BRANCH_NAME_PREFIX, 'bugfix') ||
           contains(env.BRANCH_NAME_PREFIX, 'hotfix')) &&
           !endsWith(env.BRANCH_NAME_PREFIX, '!') && github.base_ref == 'main'
-        uses: leonsteinhaeuser/git-tag-bump@latest
+        uses: leonsteinhaeuser/git-tag-bump@v1.0.2
         with:
           args: "--bump minor --v-prefix --create"
-          version: "latest"
 
       - name: Is a breaking change and is staging
         if: |
@@ -180,10 +176,9 @@ jobs:
           contains(env.BRANCH_NAME_PREFIX, 'bugfix') ||
           contains(env.BRANCH_NAME_PREFIX, 'hotfix')) &&
           endsWith(env.BRANCH_NAME_PREFIX, '!') && github.base_ref == 'staging'
-        uses: leonsteinhaeuser/git-tag-bump@latest
+        uses: leonsteinhaeuser/git-tag-bump@v1.0.2
         with:
           args: "--bump major --v-prefix --pre-release --create"
-          version: "latest"
       - name: Is a breaking change and is not staging
         if: |
           (contains(env.BRANCH_NAME_PREFIX, 'feat') ||
@@ -195,10 +190,9 @@ jobs:
           contains(env.BRANCH_NAME_PREFIX, 'bugfix') ||
           contains(env.BRANCH_NAME_PREFIX, 'hotfix')) &&
           endsWith(env.BRANCH_NAME_PREFIX, '!') && github.base_ref == 'main'
-        uses: leonsteinhaeuser/git-tag-bump@latest
+        uses: leonsteinhaeuser/git-tag-bump@v1.0.2
         with:
           args: "--bump major --v-prefix --create"
-          version: "latest"
 ```
 
 Automatically determine the next version and create a tag for it:
@@ -228,7 +222,7 @@ jobs:
       # feature --> staging
       - name: Pre-release
         if: github.base_ref == 'staging'
-        uses: leonsteinhaeuser/git-tag-bump@latest
+        uses: leonsteinhaeuser/git-tag-bump@v1.0.2
         with:
           args: >-
             --v-prefix
@@ -237,12 +231,11 @@ jobs:
             --auto-bump
             --branch-name "${{ env.FROM_BRANCH }}"
             --create
-          version: "latest"
 
       # staging --> main
       - name: Release
         if: github.head_ref == 'staging'
-        uses: leonsteinhaeuser/git-tag-bump@latest
+        uses: leonsteinhaeuser/git-tag-bump@v1.0.2
         with:
           args: >-
             --v-prefix
@@ -251,5 +244,4 @@ jobs:
             --auto-bump
             --branch-name "${{ env.FROM_BRANCH }}"
             --create
-          version: "latest"
 ```
