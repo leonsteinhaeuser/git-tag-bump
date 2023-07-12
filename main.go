@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"flag"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/go-git/go-git/v5"
@@ -108,6 +109,7 @@ func main() {
 			//Tagger:  nil,
 			Message: newTag,
 			Tagger: func() *object.Signature {
+				log.Printf("Actor settings name=%q email=%q\n", actor.Name, actor.Email)
 				if actor.Name == "" || actor.Email == "" {
 					return nil
 				}
