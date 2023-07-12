@@ -38,6 +38,8 @@ var (
 		When:  time.Now(),
 	}
 
+	githubToken = os.Getenv("GITHUB_TOKEN")
+
 	//go:embed config.yaml
 	configBts []byte
 	// embed default config during build
@@ -58,6 +60,10 @@ func init() {
 		if err != nil {
 			panic(err)
 		}
+	}
+
+	if *createTag && githubToken == "" {
+		panic("GITHUB_TOKEN environment variable must be set when --create is set")
 	}
 }
 
@@ -130,7 +136,7 @@ func main() {
 				gconfig.RefSpec(fmt.Sprintf("%s:%s", refTag, refTag)),
 			},
 			Progress: os.Stdout,
-			Auth:     &http.TokenAuth{Token: os.Getenv("GITHUB_TOKEN")},
+			Auth:     &http.TokenAuth{Token: githubToken},
 		})
 		if err != nil {
 			panic(err)
