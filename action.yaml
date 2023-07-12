@@ -29,7 +29,6 @@ runs:
       id: tagger
       shell: bash
       run: |
-        echo "TAG_NUMBER=$(git-tag-bump ${{ inputs.args }})" >> $GITHUB_OUTPUTS
-    - name: "Output tag number"
-      shell: bash
-      run: echo "Created git tag with version ${{ steps.tagger.outputs.TAG_NUMBER }}"
+        git-tag-bump ${{ inputs.args }} | tee /tmp/tag.txt
+        echo "TAG_NUMBER=$(cat /tmp/tag.txt)" >> "$GITHUB_OUTPUT"
+        rm /tmp/tag.txt

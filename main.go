@@ -4,11 +4,13 @@ import (
 	_ "embed"
 	"flag"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/go-git/go-git/v5"
 	gconfig "github.com/go-git/go-git/v5/config"
 	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/leonsteinhaeuser/git-tag-bump/branch"
 	"github.com/leonsteinhaeuser/git-tag-bump/release"
 	"gopkg.in/yaml.v3"
@@ -29,11 +31,9 @@ var (
 	actorName = flag.String("actor-name", "", "The name of the actor used to create the tag. Only used if --create is set.")
 	actorMail = flag.String("actor-mail", "", "The mail of the actor used to create the tag. Only used if --create is set.")
 
-	actor = &object.Signature{
-		Name:  *actorName,
-		Email: *actorMail,
-		When:  time.Now(),
-	}
+	actor *object.Signature = &object.Signature{}
+
+	githubToken = os.Getenv("GITHUB_TOKEN")
 
 	//go:embed config.yaml
 	configBts []byte
@@ -55,6 +55,16 @@ func init() {
 		if err != nil {
 			panic(err)
 		}
+	}
+
+	if *createTag && (*actorName == "" || *actorMail == "" || githubToken == "") {
+		panic("Both --actor-name and --actor-mail must be set when --create is set")
+	}
+
+	if *createTag && *actorName != "" && *actorMail != "" {
+		actor.Email = *actorMail
+		actor.Name = *actorName
+		actor.When = time.Now()
 	}
 }
 
@@ -125,6 +135,8 @@ func main() {
 			RefSpecs: []gconfig.RefSpec{
 				gconfig.RefSpec(fmt.Sprintf("%s:%s", refTag, refTag)),
 			},
+			Progress: os.Stdout,
+			Auth:     &http.BasicAuth{Username: "bot", Password: githubToken},
 		})
 		if err != nil {
 			panic(err)
