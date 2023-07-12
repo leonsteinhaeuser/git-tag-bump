@@ -29,6 +29,6 @@ runs:
       id: tagger
       shell: bash
       run: |
-        git-tag-bump ${{ inputs.args }} > tee /tmp/tag.txt
+        git-tag-bump ${{ inputs.args }} | tee /tmp/tag.txt
         echo "TAG_NUMBER=$(cat /tmp/tag.txt)"
         rm /tmp/tag.txt
