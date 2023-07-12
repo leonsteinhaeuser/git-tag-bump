@@ -30,5 +30,5 @@ runs:
       shell: bash
       run: |
         git-tag-bump ${{ inputs.args }} | tee /tmp/tag.txt
-        echo "TAG_NUMBER=$(cat /tmp/tag.txt)"
+        echo "TAG_NUMBER=$(cat /tmp/tag.txt)" >> "$GITHUB_OUTPUT"
         rm /tmp/tag.txt
