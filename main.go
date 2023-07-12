@@ -62,6 +62,10 @@ func init() {
 		}
 	}
 
+	if *createTag && (*actorName == "" || *actorMail == "") {
+		panic("Both --actor-name and --actor-mail must be set when --create is set")
+	}
+
 	if *createTag && githubToken == "" {
 		panic("GITHUB_TOKEN environment variable must be set when --create is set")
 	}
