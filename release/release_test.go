@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Masterminds/semver"
+	"github.com/Masterminds/semver/v3"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/storage/memory"
 )
@@ -263,6 +263,17 @@ func Test_bumpVersion(t *testing.T) {
 			want: "1.0.1-alpha.1",
 		},
 		{
+			name: "patch pre-release with existing pre-release",
+			args: args{
+				latest:           semver.MustParse("1.0.0-alpha.1"),
+				semVerType:       SemVerBumpTypePatch,
+				preReleaseFormat: PreReleaseFormatSemVer,
+				preReleasePrefix: "alpha",
+				isPreRelease:     true,
+			},
+			want: "1.0.0-alpha.2",
+		},
+		{
 			name: "minor",
 			args: args{
 				latest:           semver.MustParse("1.0.0"),
@@ -285,6 +296,17 @@ func Test_bumpVersion(t *testing.T) {
 			want: "1.1.0-alpha.1",
 		},
 		{
+			name: "minor pre-release with existing pre-release",
+			args: args{
+				latest:           semver.MustParse("1.1.0-alpha.1"),
+				semVerType:       SemVerBumpTypeMinor,
+				preReleaseFormat: PreReleaseFormatSemVer,
+				preReleasePrefix: "alpha",
+				isPreRelease:     true,
+			},
+			want: "1.2.0-alpha.1",
+		},
+		{
 			name: "major",
 			args: args{
 				latest:           semver.MustParse("1.0.0"),
@@ -299,6 +321,17 @@ func Test_bumpVersion(t *testing.T) {
 			name: "major",
 			args: args{
 				latest:           semver.MustParse("1.0.0"),
+				semVerType:       SemVerBumpTypeMajor,
+				preReleaseFormat: PreReleaseFormatSemVer,
+				preReleasePrefix: "alpha",
+				isPreRelease:     true,
+			},
+			want: "2.0.0-alpha.1",
+		},
+		{
+			name: "major pre-release with existing pre-release",
+			args: args{
+				latest:           semver.MustParse("1.0.0-alpha.1"),
 				semVerType:       SemVerBumpTypeMajor,
 				preReleaseFormat: PreReleaseFormatSemVer,
 				preReleasePrefix: "alpha",

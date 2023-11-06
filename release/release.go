@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Masterminds/semver"
+	"github.com/Masterminds/semver/v3"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 )
@@ -134,7 +134,12 @@ func BumpTag(latest *semver.Version, semVerType SemVerBumpType, preReleaseFormat
 	case SemVerBumpTypePatch:
 		newTag = latest.IncPatch()
 	}
-	// if pre-release is enabled, bump the pre-release version
+	if latest.Major() == newTag.Major() && latest.Minor() == newTag.Minor() && latest.Patch() == newTag.Patch() && isPreRelease {
+		// we identified the same major, minor and patch version, so we need to bump the pre-release version
+		// in order to do that, we need to keep the pre-release information from the latest version
+		// and just bump the pre-release version
+		newTag = *latest
+	}
 	if isPreRelease {
 		vrs := bumpPreRelease(preReleaseFormat, newTag, preReleasePrefix)
 		newTag = *semver.MustParse(vrs)
