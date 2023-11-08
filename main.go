@@ -136,7 +136,7 @@ func main() {
 			}(),
 		})
 		if err != nil {
-			panic(err)
+			panic(fmt.Sprintf("Could not create tag: %q, exited with error: %s", newTag, err))
 		}
 
 		// push the tag to the remote
