@@ -39,6 +39,8 @@ const (
 	SemVerBumpTypeMinor SemVerBumpType = "minor"
 	// SemVerBumpTypePatch is the bump type for patch versions.
 	SemVerBumpTypePatch SemVerBumpType = "patch"
+	// SemVerBumpTypeNone is the bump type for no version bump.
+	SemVerBumpTypeNone SemVerBumpType = "none"
 )
 
 func (s SemVerBumpType) String() string {
@@ -133,6 +135,9 @@ func BumpTag(latest *semver.Version, semVerType SemVerBumpType, preReleaseFormat
 		newTag = latest.IncMinor()
 	case SemVerBumpTypePatch:
 		newTag = latest.IncPatch()
+	case SemVerBumpTypeNone:
+		// if no bump type is set, we just use the latest version
+		newTag = *latest
 	}
 	if latest.Major() == newTag.Major() && latest.Minor() == newTag.Minor() && latest.Patch() == newTag.Patch() && isPreRelease {
 		// we identified the same major, minor and patch version, so we need to bump the pre-release version
