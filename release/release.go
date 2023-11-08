@@ -2,6 +2,7 @@ package release
 
 import (
 	"fmt"
+	"log"
 	"regexp"
 	"sort"
 	"strconv"
@@ -76,7 +77,7 @@ func bumpPreRelease(smvFormat PreReleaseFormat, version semver.Version, preRelea
 
 // GetLatestSemVerTagFromRepo returns the latest semver tag from a given git repository.
 // If no semver tag is found, it returns a semver.Version with the value v0.0.0.
-func GetLatestSemVerTagFromRepo(repo *git.Repository) (*semver.Version, error) {
+func GetLatestSemVerTagFromRepo(repo *git.Repository, isPreRelease bool) (*semver.Version, error) {
 	// get tags from repository
 	tags, err := repo.Tags()
 	if err != nil {
@@ -105,11 +106,13 @@ func GetLatestSemVerTagFromRepo(repo *git.Repository) (*semver.Version, error) {
 	// get latest version
 	var latest *semver.Version
 	if len(vs) > 0 {
-		if vs[len(vs)-1].Prerelease() != "" {
+		if vs[len(vs)-1].Prerelease() != "" && isPreRelease {
+			log.Println("Latest tag is a pre-release version", vs[len(vs)-1])
 			latest = vs[len(vs)-1]
 		} else {
 			for i := len(vs) - 1; i >= 0; i-- {
 				if vs[i].Prerelease() == "" {
+					log.Println("Latest tag is a non pre-release version", vs[i])
 					latest = vs[i]
 					break
 				}
@@ -127,25 +130,18 @@ func GetLatestSemVerTagFromRepo(repo *git.Repository) (*semver.Version, error) {
 // BumpTag takes a semver.Version and a semVerBumpType and returns the
 // bumped version as a string.
 func BumpTag(latest *semver.Version, semVerType SemVerBumpType, preReleaseFormat PreReleaseFormat, preReleasePrefix string, isPreRelease bool) string {
-	newTag := semver.Version{}
+	formattedLatest := semver.New(latest.Major(), latest.Minor(), latest.Patch(), "", "")
+	newTag := *latest
 	switch semVerType {
 	case SemVerBumpTypeMajor:
-		newTag = latest.IncMajor()
+		newTag = formattedLatest.IncMajor()
 	case SemVerBumpTypeMinor:
-		newTag = latest.IncMinor()
+		newTag = formattedLatest.IncMinor()
 	case SemVerBumpTypePatch:
-		newTag = latest.IncPatch()
-	case SemVerBumpTypeNone:
-		// if no bump type is set, we just use the latest version
-		newTag = *latest
-	}
-	if latest.Major() == newTag.Major() && latest.Minor() == newTag.Minor() && latest.Patch() == newTag.Patch() && isPreRelease {
-		// we identified the same major, minor and patch version, so we need to bump the pre-release version
-		// in order to do that, we need to keep the pre-release information from the latest version
-		// and just bump the pre-release version
-		newTag = *latest
+		newTag = formattedLatest.IncPatch()
 	}
 	if isPreRelease {
+		log.Println("Bumping pre-release version", newTag)
 		vrs := bumpPreRelease(preReleaseFormat, newTag, preReleasePrefix)
 		newTag = *semver.MustParse(vrs)
 	}

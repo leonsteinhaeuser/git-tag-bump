@@ -76,7 +76,7 @@ func main() {
 		panic(err)
 	}
 
-	latest, err := release.GetLatestSemVerTagFromRepo(repo)
+	latest, err := release.GetLatestSemVerTagFromRepo(repo, *isPreRelease)
 	if err != nil {
 		panic(err)
 	}
@@ -84,7 +84,7 @@ func main() {
 	// override the current latest identified tag with the one from the flag
 	if *gitBaseTagOverride != "" {
 		overrideTag := semver.MustParse(*gitBaseTagOverride)
-		if overrideTag.Major() != latest.Major() || overrideTag.Minor() != latest.Minor() {
+		if overrideTag.Major() != latest.Major() || overrideTag.Minor() != latest.Minor() || overrideTag.Patch() != latest.Patch() {
 			// if the major, minor or patch version of the override tag does not match the latest tag, use the override tag
 			latest = overrideTag
 		}
