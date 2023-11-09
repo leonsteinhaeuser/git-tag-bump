@@ -184,9 +184,10 @@ func Test_bumpPreRelease(t *testing.T) {
 	}
 }
 
-func Test_getLatestSemVerTagFromRepoPath(t *testing.T) {
+func Test_GetLatestSemVerTagFromRepo(t *testing.T) {
 	type args struct {
-		repo *git.Repository
+		repo         *git.Repository
+		isPreRelease bool
 	}
 	tests := []struct {
 		name    string
@@ -214,20 +215,20 @@ func Test_getLatestSemVerTagFromRepoPath(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := GetLatestSemVerTagFromRepo(tt.args.repo)
+			got, err := GetLatestSemVerTagFromRepo(tt.args.repo, tt.args.isPreRelease)
 			if (err != nil) != tt.wantErr {
-				t.Errorf("getLatestSemVerTagFromRepoPath() error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("GetLatestSemVerTagFromRepo() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
 
 			if got.String() != tt.want.String() {
-				t.Errorf("getLatestSemVerTagFromRepoPath() = %v, want %v", got, tt.want)
+				t.Errorf("GetLatestSemVerTagFromRepo() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func Test_bumpVersion(t *testing.T) {
+func Test_BumpTag(t *testing.T) {
 	type args struct {
 		latest           *semver.Version
 		semVerType       SemVerBumpType
@@ -271,7 +272,7 @@ func Test_bumpVersion(t *testing.T) {
 				preReleasePrefix: "alpha",
 				isPreRelease:     true,
 			},
-			want: "1.0.0-alpha.2",
+			want: "1.0.1-alpha.1",
 		},
 		{
 			name: "minor",
@@ -339,11 +340,34 @@ func Test_bumpVersion(t *testing.T) {
 			},
 			want: "2.0.0-alpha.1",
 		},
+		// tests added during bug fixes
+		{
+			name: "pre-release with existing pre-release and bump type none",
+			args: args{
+				latest:           semver.MustParse("v1.1.0"),
+				semVerType:       SemVerBumpTypeNone,
+				preReleaseFormat: PreReleaseFormatSemVer,
+				preReleasePrefix: "rc",
+				isPreRelease:     true,
+			},
+			want: "1.1.0-rc.1",
+		},
+		{
+			name: "release with existing pre-release and bump type none",
+			args: args{
+				latest:           semver.MustParse("v1.1.0"),
+				semVerType:       SemVerBumpTypeNone,
+				preReleaseFormat: PreReleaseFormatSemVer,
+				preReleasePrefix: "rc",
+				isPreRelease:     false,
+			},
+			want: "1.1.0",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := BumpTag(tt.args.latest, tt.args.semVerType, tt.args.preReleaseFormat, tt.args.preReleasePrefix, tt.args.isPreRelease); got != tt.want {
-				t.Errorf("bumpVersion() = %v, want %v", got, tt.want)
+				t.Errorf("BumpTag() = %v, want %v", got, tt.want)
 			}
 		})
 	}

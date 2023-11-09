@@ -9,7 +9,7 @@ A simple tool to bump git tags (semver). It can be used to bump the patch, minor
 | Flag            | Type     | Required | Default | Description |
 |-----------------|----------|----------|---------|-------------|
 | `--auto-bump`   | `bool`   | false    | `false` | Automatically determine the next version based on the last tag and the branch name passed to it. |
-| `--bump`        | `string` | false    | `patch` | The part of the version to bump. Can be `patch`, `minor` or `major`. |
+| `--bump`        | `string` | false    | `patch` | The part of the version to bump. Can be `patch`, `minor`, `major` or `none`. `none` is a special indicator to keep the current tag version, e.g. to bump the `pre-release` version. `none` should always be used together with `--git-base-tag`, which can based on a branch name, for example. |
 | `--config`      | `string` | false    | `` | The path to the config file. If not defined, the default config will be used. |
 | `--pre-release` | `bool`   | false    | `false` | Whether to create a pre-release tag. |
 | `--pre-release-format` | `string` | false    | `semver` | The format of the pre-release tag. Can be `semver`, `date` or `datetime` |
@@ -20,6 +20,7 @@ A simple tool to bump git tags (semver). It can be used to bump the patch, minor
 | `--actor-email` | `string` | false | `` | The mail of the actor used to create the tag. Only used if `--create` is set. |
 | `--branch-name` | `string` | false | `` | The name of the branch to use. |
 | `--v-prefix`   | `bool` | false    | `true` | Whether to prefix the tag with `v`. Example: `v1.0.0` instead of `1.0.0`. |
+| `--git-base-tag` | `string` | false | `` | Override the base tag to use for the bump. If not set, the latest tag will be used. |
 
 ## Environment Variables
 
@@ -131,7 +132,7 @@ jobs:
           contains(env.BRANCH_NAME_PREFIX, 'refactor') ||
           contains(env.BRANCH_NAME_PREFIX, 'revert')) &&
           !endsWith(env.BRANCH_NAME_PREFIX, '!') && github.base_ref == 'staging'
-        uses: leonsteinhaeuser/git-tag-bump@v1.0.2
+        uses: leonsteinhaeuser/git-tag-bump@v1.1.0
         with:
           args: "--bump patch --v-prefix --pre-release --create"
       - name: Is feature branch and does not contain a breaking change and is not staging
@@ -142,7 +143,7 @@ jobs:
           contains(env.BRANCH_NAME_PREFIX, 'refactor') ||
           contains(env.BRANCH_NAME_PREFIX, 'revert')) &&
           !endsWith(env.BRANCH_NAME_PREFIX, '!') && github.base_ref == 'main'
-        uses: leonsteinhaeuser/git-tag-bump@v1.0.2
+        uses: leonsteinhaeuser/git-tag-bump@v1.1.0
         with:
           args: "--bump patch --v-prefix --create"
 
@@ -152,7 +153,7 @@ jobs:
           contains(env.BRANCH_NAME_PREFIX, 'bugfix') ||
           contains(env.BRANCH_NAME_PREFIX, 'hotfix')) &&
           !endsWith(env.BRANCH_NAME_PREFIX, '!') && github.base_ref == 'staging'
-        uses: leonsteinhaeuser/git-tag-bump@v1.0.2
+        uses: leonsteinhaeuser/git-tag-bump@v1.1.0
         with:
           args: "--bump minor --v-prefix --pre-release --create"
       - name: Is patch branch and is not staging
@@ -161,7 +162,7 @@ jobs:
           contains(env.BRANCH_NAME_PREFIX, 'bugfix') ||
           contains(env.BRANCH_NAME_PREFIX, 'hotfix')) &&
           !endsWith(env.BRANCH_NAME_PREFIX, '!') && github.base_ref == 'main'
-        uses: leonsteinhaeuser/git-tag-bump@v1.0.2
+        uses: leonsteinhaeuser/git-tag-bump@v1.1.0
         with:
           args: "--bump minor --v-prefix --create"
 
@@ -176,7 +177,7 @@ jobs:
           contains(env.BRANCH_NAME_PREFIX, 'bugfix') ||
           contains(env.BRANCH_NAME_PREFIX, 'hotfix')) &&
           endsWith(env.BRANCH_NAME_PREFIX, '!') && github.base_ref == 'staging'
-        uses: leonsteinhaeuser/git-tag-bump@v1.0.2
+        uses: leonsteinhaeuser/git-tag-bump@v1.1.0
         with:
           args: "--bump major --v-prefix --pre-release --create"
       - name: Is a breaking change and is not staging
@@ -190,7 +191,7 @@ jobs:
           contains(env.BRANCH_NAME_PREFIX, 'bugfix') ||
           contains(env.BRANCH_NAME_PREFIX, 'hotfix')) &&
           endsWith(env.BRANCH_NAME_PREFIX, '!') && github.base_ref == 'main'
-        uses: leonsteinhaeuser/git-tag-bump@v1.0.2
+        uses: leonsteinhaeuser/git-tag-bump@v1.1.0
         with:
           args: "--bump major --v-prefix --create"
 ```
@@ -222,7 +223,7 @@ jobs:
       # feature --> staging
       - name: Pre-release
         if: github.base_ref == 'staging'
-        uses: leonsteinhaeuser/git-tag-bump@v1.0.2
+        uses: leonsteinhaeuser/git-tag-bump@v1.1.0
         with:
           args: >-
             --v-prefix
@@ -235,7 +236,7 @@ jobs:
       # staging --> main
       - name: Release
         if: github.head_ref == 'staging'
-        uses: leonsteinhaeuser/git-tag-bump@v1.0.2
+        uses: leonsteinhaeuser/git-tag-bump@v1.1.0
         with:
           args: >-
             --v-prefix
@@ -244,4 +245,47 @@ jobs:
             --auto-bump
             --branch-name "${{ env.FROM_BRANCH }}"
             --create
+```
+
+Create a Tag based on a release branch:
+
+```yaml
+name: Release
+
+on:
+  pull_request:
+    types: [closed, opened, synchronize]
+
+jobs:
+  tag-main-branch:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Split branch name
+        shell: bash
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: echo "RELEASE_TAG=${HEAD_REF##*/}" >> $GITHUB_ENV
+
+      - name: Create Release Tag
+        if: github.base_ref == 'main' && github.event.pull_request.merged == true
+        uses: leonsteinhaeuser/git-tag-bump@v1.1.0
+        with:
+          args: >-
+            --v-prefix --create --actor-name "GitHub Actions" --actor-mail "github-actions[bot]@users.noreply.github.com"
+            --git-base-tag "$RELEASE_TAG" --bump none
+
+      - name: Create Pre-Release Tag
+        if: contains(github.base_ref, "release/")
+        uses: leonsteinhaeuser/git-tag-bump@v1.1.0
+        with:
+          args: >-
+            --v-prefix --create --actor-name "GitHub Actions" --actor-mail "github-actions[bot]@users.noreply.github.com"
+            --git-base-tag "$RELEASE_TAG" --bump none --pre-release
 ```
