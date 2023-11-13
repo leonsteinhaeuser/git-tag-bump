@@ -250,14 +250,14 @@ jobs:
 Create a Tag based on a release branch:
 
 ```yaml
-name: Release
+name: Create Tag
 
 on:
   pull_request:
     types: [closed, opened, synchronize]
 
 jobs:
-  tag-main-branch:
+  create-tag:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -282,7 +282,7 @@ jobs:
             --git-base-tag "$RELEASE_TAG" --bump none
 
       - name: Create Pre-Release Tag
-        if: contains(github.base_ref, "release/")
+        if: contains(github.head_ref, 'release/') && github.event.pull_request.merged == false
         uses: leonsteinhaeuser/git-tag-bump@v1.1.0
         with:
           args: >-
