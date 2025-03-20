@@ -15,9 +15,10 @@ A simple tool to bump git tags (semver). It can be used to bump the patch, minor
 | `--pre-release-format` | `string` | false    | `semver` | The format of the pre-release tag. Can be `semver`, `date` or `datetime` |
 | `--pre-release-prefix` | `string` | false    | `rc` | The prefix of the pre-release tag. Example: When defining the following tag `v1.0.0-rc.1`, `rc` would be the prefix and the number after it the format ***semver***. |
 | `--repo-path`   | `string` | false    | `.` | The path to the git repository. If not defined, the current working directory will be used. |
-| `--create` | `bool` | false | `false` | Whether to create and push the tag if it does not exist. Requires `--actor-name`, `--actor-mail` and the env variable `GITHUB_TOKEN` to be set. |
-| `--actor-name` | `string` | false | `` | The name of the actor used to create the tag. Only used if `--create` is set. |
-| `--actor-email` | `string` | false | `` | The mail of the actor used to create the tag. Only used if `--create` is set. |
+| `--create` | `bool` | false | `false` | Whether to create and push the tag if it does not exist. Requires the env variable `GITHUB_TOKEN` to be set, and either `--lightweight` or both of `--actor-name` and `--actor-mail`. |
+| `--lightweight` | Whether any tag created should be a lightweight tag. |
+| `--actor-name` | `string` | false | `` | The name of the actor used to create the tag. Only used if `--create` is set, and `--lightweight` is not. |
+| `--actor-email` | `string` | false | `` | The mail of the actor used to create the tag. Only used if `--create` is set, and `--lightweight` is not. |
 | `--branch-name` | `string` | false | `` | The name of the branch to use. |
 | `--v-prefix`   | `bool` | false    | `true` | Whether to prefix the tag with `v`. Example: `v1.0.0` instead of `1.0.0`. |
 | `--git-base-tag` | `string` | false | `` | Override the base tag to use for the bump. If not set, the latest tag will be used. |
