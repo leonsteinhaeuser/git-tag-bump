@@ -24,7 +24,6 @@ jobs:
         with:
           go-version: ${{ env.go_version }}
           cache: false
-      - run: go mod tidy
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v4
         with:
